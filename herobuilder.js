@@ -8,34 +8,33 @@ class HeroBuilder {
     this.calculateBounds()
   }
 
-  addNode(text) {
-    this.nodes.push(new Node(text || `Node ${this.nodes.length+1}`,  mouseX, mouseY))
+  addNode(text, x, y) {
+    var node = new Node(text || `Node ${this.nodes.length+1}`,  x, y)
+    node.color = this.getRandomColor()
+    this.nodes.push(node)
     this.calculateBounds()
+    return node
   }
 
-  addLinkedNode(parentNode, nodeText, linkText) {
-    var childNode = new Node(nodeText || `Node ${this.nodes.length+1}`, mouseX, mouseY)
-    var link = new Link(linkText || `Link ${this.links.length+1}`, parentNode, childNode)
-    childNode.linkFrom.push(link)
-    parentNode.linkTo.push(link)
-    this.links.push(link)
-    this.nodes.push(childNode)
-    this.calculateBounds()
+  addLinkedNode(parentNode, nodeText, linkText, x, y) {
+    var childNode = this.addNode(nodeText, x, y)
+    var link = this.linkNodes(parentNode, childNode, linkText)
   }
 
-  LinkNodes(parentNode, childNode, linkText) {
+  linkNodes(parentNode, childNode, linkText) {
     var link = new Link(linkText || `Link ${this.links.length+1}`, parentNode, childNode)
     this.links.push(link)
-    childNode.linkFrom.push(link)
-    parentNode.linkTo.push(link)
+    childNode.linksFrom.push(link)
+    parentNode.linksTo.push(link)
+    return link
   }
 
 
   calculateBounds() {
-    this.bounds[0].x = this.nodes.reduce( (a, b) => a.pos.x < b.pos.x ? a : b).pos.x - 10
-    this.bounds[1].x = this.nodes.reduce( (a, b) => a.pos.x > b.pos.x ? a : b).pos.x + 10
-    this.bounds[0].y = this.nodes.reduce( (a, b) => a.pos.y < b.pos.y ? a : b).pos.y - 10
-    this.bounds[1].y = this.nodes.reduce( (a, b) => a.pos.y > b.pos.y ? a : b).pos.y + 10
+    this.bounds[0].x = this.nodes.reduce( (a, b) => a.pos.x < b.pos.x ? a : b).pos.x - RADIUS
+    this.bounds[1].x = this.nodes.reduce( (a, b) => a.pos.x > b.pos.x ? a : b).pos.x + RADIUS
+    this.bounds[0].y = this.nodes.reduce( (a, b) => a.pos.y < b.pos.y ? a : b).pos.y - RADIUS
+    this.bounds[1].y = this.nodes.reduce( (a, b) => a.pos.y > b.pos.y ? a : b).pos.y + RADIUS
   }
 
   withinBounds(x, y) {
@@ -67,6 +66,8 @@ class HeroBuilder {
     return false
   }
 
+  getRandomColor() { return color(`hsla(${map(floor(random(0, 10)), 0, 10, 0, 360)}, 85%, 50%, 1)`) }
+
   refresh() {
 
   }
@@ -77,7 +78,7 @@ class HeroBuilder {
       stroke(0, 255, 0)
       rect(this.bounds[0].x, this.bounds[0].y, this.bounds[1].x - this.bounds[0].x, this.bounds[1].y - this.bounds[0].y)
     }
-    this.nodes.forEach(n => n.draw())
     this.links.forEach(n => n.draw())
+    this.nodes.forEach(n => n.draw())
   }
 }

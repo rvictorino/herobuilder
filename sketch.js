@@ -1,8 +1,10 @@
 let heroBuilder
-let originNode, destNode, originX, originY
+let originNode, destNode, originX, originY, mouseMoved
+const RADIUS = 15
 
 function setup() {
-  createCanvas(400, 400)
+  createCanvas(windowWidth, windowHeight)
+  strokeWeight(4)
 
   heroBuilder = new HeroBuilder()
 }
@@ -12,6 +14,10 @@ function draw() {
   background(255)
 
   if(originNode) {
+    stroke(51)
+    h = heroBuilder.getHoveredNode()
+    if(h)
+      stroke(h.color)
     line(originNode.pos.x, originNode.pos.y, mouseX, mouseY)
   }
 
@@ -24,39 +30,62 @@ function mousePressed() {
   originY = mouseY
 }
 function mouseReleased() {
+
+  var clickedX = mouseX
+  var clickedY = mouseY
+
   destNode = heroBuilder.getHoveredNode()
 
-  if(mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height || heroBuilder.getHoveredLink()) {
+  mouseMoved = false
+  if(originX != mouseX || originY != mouseY) {
+    mouseMoved = true
+  }
+  var mouseOutOfCanvas = mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height
+  if(!mouseMoved || mouseOutOfCanvas || heroBuilder.getHoveredLink() || !originNode || originNode == destNode) {
     originNode = false
     return
   }
 
-  if(originNode && destNode && originNode != destNode) {
+  if(destNode) {
     // dragged from one node to another
     var linkText = prompt("Enter Link text")
     if(linkText)
-      heroBuilder.LinkNodes(originNode, destNode, linkText)
-  } else if(originNode && !destNode) {
+      heroBuilder.linkNodes(originNode, destNode, linkText)
+  } else {
     // dragged from one node to nowhere
     var linkText
     var nodeText = prompt("Enter Node text")
     if(nodeText)
       linkText = prompt("Enter Link text")
     if(linkText)
-      heroBuilder.addLinkedNode(originNode,nodeText, linkText)
-  } else if(!originNode && !destNode && originX == mouseX && originY == mouseY) {
-    // empty click
-    var nodeText = prompt("Enter Node text")
-    if(nodeText)
-      heroBuilder.addNode(nodeText)
+      heroBuilder.addLinkedNode(originNode,nodeText, linkText, clickedX, clickedY)
   }
+
   originNode = false
 }
 
 
 function mouseClicked() {
+
+  var clickedX = mouseX
+  var clickedY = mouseY
+
+  if(mouseMoved)
+    return
   var link = heroBuilder.getHoveredLink()
+  var node = heroBuilder.getHoveredNode()
   if(link) {
-    link.text = prompt("Enter Link text")
+    var linkText = prompt("Enter Link text")
+    if(linkText)
+    link.text = linkText
+  } else if(node) {
+    var nodeText = prompt("Enter Node text")
+    if(nodeText)
+      node.text = nodeText
+  } else {
+    var nodeText = prompt("Enter Node text")
+    if(nodeText)
+      heroBuilder.addNode(nodeText, clickedX, clickedY)
   }
+  originNode = false
 }

@@ -3,9 +3,10 @@ class Node {
   constructor(text, x, y) {
     this.text = text || ""
     this.pos = createVector(x, y)
-    this.bounds = [createVector(x-10, y-10), createVector(x+10, y+10)]
+    this.bounds = [createVector(x-RADIUS, y-RADIUS), createVector(x+RADIUS, y+RADIUS)]
     this.linksFrom = []
     this.linksTo = []
+    this.color = color(0)
   }
 
 
@@ -21,6 +22,10 @@ class Node {
   }
 
   draw() {
+    noStroke()
+    fill(this.color)
+    ellipse(this.pos.x, this.pos.y, RADIUS * 2)
+
     if(this.mouseOver()) {
       noFill()
       stroke(255, 0, 0)
@@ -29,9 +34,6 @@ class Node {
       noStroke()
       text(this.text, this.bounds[1].x, this.bounds[1].y, 100, 100)
     }
-    stroke(0)
-    fill(0)
-    ellipse(this.pos.x, this.pos.y, 20)
   }
 
 }
